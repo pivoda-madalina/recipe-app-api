@@ -1,15 +1,19 @@
-from python:3.7-alpine
-maintainer Madalina
+FROM python:3.7-alpine
+MAINTAINER Madalina
 
-env PYTHON UNBUFFERED 1
+ENV PYTHONUNBUFFERED 1
 
-copy ./requirements.txt /requirements.txt
+COPY ./requirements.txt /requirements.txt
+RUN apk add --update --no-cache postgresql-client
+RUN apk add --update --no-cache --virtual .tmp-build-deps \
+    gcc libc-dev linux-headers postgresql-dev
 
-run pip install -r /requirements.txt
+RUN pip install -r /requirements.txt
+RUN apk del .tmp-build-deps
 
-run mkdir /app
-workdir /app
-copy ./app /app
+RUN mkdir /app
+WORKDIR /app
+COPY ./app /app
 
-run adduser -D user
-user user
+RUN adduser -D user
+USER user
